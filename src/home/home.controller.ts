@@ -194,21 +194,24 @@ export class HomeController {
       const userId = user !== null ? user.userId : 0;
 
       // 내 주변 모임 조회
-      const crew = await this.homeService.getCrew(userId);
+      const exCrew = await this.homeService.getCrew(userId);
 
       /* 장기 모임은 crewDDay가 null로 들어간다. 
       따라서 제일 최근 일정이 crewDDay이므로 제일 최근 일정으로 crewDDay를 조회에서 보내준다.*/
-      for (let i = 0; i < crew.length; i++) {
-        if (crew[i].crew_crewDDay === null) {
-          const crewId = parseInt(crew[i].crew_crewId);
+      const promises = exCrew.map(async (item) => {
+        if (item.crew_crewDDay === null) {
+          const crewId = parseInt(item.crew_crewId);
           const schedule = await this.scheduleService.findScheduleCloseToToday(
             crewId,
           );
           if (schedule) {
-            crew[i].crew_crewDDay = schedule.scheduleDDay;
+            item.crew_crewDDay = schedule.scheduleDDay;
           }
         }
-      }
+        return item;
+      });
+
+      const crew = await Promise.all(promises);
 
       // 내 주변 모임 조회 결과가 있을 경우
       return res.status(HttpStatus.OK).json(crew);

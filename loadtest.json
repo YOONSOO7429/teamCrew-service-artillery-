@@ -6,14 +6,15 @@
         "duration": 60,
         "arrivalRate": 30
       }
-    ]
+    ],
+    "timeout": 100
   },
   "scenarios": [
     {
       "flow": [
         {
           "get": {
-            "url": "/api/home/map"
+            "url": "/api/crew/9"
           }
         }
       ]
